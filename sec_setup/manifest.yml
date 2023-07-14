@@ -1,0 +1,53 @@
+manifest_version: 1 # required
+
+#version identifier
+version:
+  name: SecurityDemo
+  label: "Snowflake Native app security Demo"
+  comment: "Code base to explain native app security and how it works"
+
+
+artifacts:
+  readme: README.md
+  setup_script: setup_script.sql
+  default_streamlit: CUSTOMER_DATA.STREAMLIT
+  extension_code: true
+
+configuration:
+  log_level: debug
+  trace_level: always
+
+privileges:
+  - EXECUTE TASK:
+      description: "Run Tasks on Your Behalf on your account"
+  - EXECUTE MANAGED TASK:
+      description: "Run Serverless tasks on your behalf"
+  - CREATE WAREHOUSE:
+      description: "Ability to create Warehouses"
+  - MANAGE WAREHOUSES:
+      description: "Will manage warehouses to optimizing the efficiency"
+  - CREATE DATABASE:
+      description: "Ability to create Databases on your account"
+  - IMPORTED PRIVILEGES ON SNOWFLAKE DB:
+        description: "Share Object Access - Will Query Snowflake WH for Usage Views"
+
+references:
+  - enrichment_table:
+      label: "Enrichment Table"
+      description: "Requesting Select, Insert & Update access to a local Table"
+      privileges:
+        - SELECT
+        - INSERT
+        - UPDATE
+      object_type: Table
+      multi_valued: false
+      register_callback: CORE.REGISTER_CB
+
+  - data_view:
+      label: "View Access"
+      description: "Requesting access to read from a table in your account"
+      privileges:
+        - SELECT
+      object_type: View
+      multi_valued: false
+      register_callback: CORE.REGISTER_CB
