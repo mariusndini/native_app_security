@@ -69,7 +69,7 @@ DROP APPLICATION native_app_sec_application;
 CREATE APPLICATION native_app_sec_application
   FROM APPLICATION PACKAGE native_app_sec_package
   USING VERSION V1
-  PATCH 12;
+  PATCH 88;
 
 //SHOW SCHEMAS IN APP
 show schemas in database native_app_sec_application;
@@ -95,6 +95,7 @@ GRANT APPLICATION ROLE native_app_sec_application.APP_PUBLIC TO ROLE LOCAL_ROLE;
 // They can create tables in the Native App
 -- assuming they have priviledges to do so
 CREATE TABLE NATIVE_APP_SEC_APPLICATION.CUSTOMER_DATA.C_TABLE (V VARIANT);
+
 // Data can be inserted in the application
 INSERT INTO NATIVE_APP_SEC_APPLICATION.CUSTOMER_DATA.C_TABLE (select PARSE_JSON('{"Time":"'||current_timestamp()||'"}') );
 //They can query data in the application
@@ -123,9 +124,18 @@ CREATE TABLE NATIVE_APP_SEC_APPLICATION.CORE.C_TABLE (V VARIANT);
 SELECT *
 FROM NATIVE_APP_SEC_APPLICATION.CORE.ACCT;
 
+CREATE SCHEMA native_app_sec_package.DATA;
+
+
+GRANT REFERENCE_USAGE ON DATABASE STOCKS TO SHARE IN APPLICATION PACKAGE native_app_sec_package;
+GRANT USAGE ON SCHEMA native_app_sec_package.DATA TO SHARE IN APPLICATION PACKAGE native_app_sec_package;
+CREATE VIEW native_app_sec_package.DATA.MINUTE_TICKS AS SELECT * FROM STOCKS.PRICE.MINUTE_TICKS;
+GRANT SELECT ON VIEW native_app_sec_package.DATA.MINUTE_TICKS TO SHARE IN APPLICATION PACKAGE native_app_sec_package;
 
 
 
+
+-- CONSUMER TASKS BELOW - 
 ------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------
 -- REFERENCE & PRIVILEGES IN APPLICATION   -----------------------------------------------------
@@ -137,24 +147,53 @@ SHOW REFERENCES IN APPLICATION NATIVE_APP_SEC_APPLICATION;
 // SHOW LIST OF ACCOUNT LEVEL PRIVILEGES APPLICATION NEEDS TO RUN
 SHOW PRIVILEGES IN APPLICATION NATIVE_APP_SEC_APPLICATION;
 
+-- SHOW ROLES IN APP DATABASE
+-- These roles can be assigned to local roles in the Consumer account
+show application roles in native_app_sec_application;
+
 GRANT EXECUTE TASK ON ACCOUNT TO APPLICATION NATIVE_APP_SEC_APPLICATION;
 
 GRANT IMPORTED PRIVILEGES ON DATABASE SNOWFLAKE TO APPLICATION NATIVE_APP_SEC_APPLICATION;
 
+
 -- REGISTER LOCAL OBJECTS WITH THE DATABASE
 -- Meaning - give access to local objects to the application to access
 CALL NATIVE_APP_SEC_APPLICATION.CORE.REGISTER_CB(
-    'ENRICHMENT_TABLE'
+    'holdings_table'
     ,'ADD'
-    , SYSTEM$REFERENCE('TABLE', 'LOCAL_DB.PUBLIC.MY_DATA', 'PERSISTENT', 'SELECT', 'INSERT', 'UPDATE') );
+    , SYSTEM$REFERENCE('TABLE', 'LOCAL_DB.PUBLIC.HOLDINGS', 'PERSISTENT', 'SELECT', 'INSERT', 'UPDATE') );
 
 //Test - selecting from reference object and normal object
-SELECT * FROM reference('enrichment_table');
-select * from anondb.geo.geo_table;
+SELECT * FROM reference('holdings_table');
+
 
 //create objects in database to do things with
 CALL NATIVE_APP_SEC_APPLICATION.CORE.CREATE_OBJECTS();
 
-//SELECT FROM THE VIEW CREATED FROM WITHIN THE APP
+
 select *
-from NATIVE_APP_SEC_APPLICATION.CUSTOMER_DATA.ENRICH;
+from NATIVE_APP_SEC_APPLICATION.CUSTOMER_DATA.CURRENT_VALUE
+;
+
+
+
+
+
+
+
+
+
+
+
+
+SELECT listing_global_name,
+   listing_display_name,
+   charge_type,
+   charge
+FROM SNOWFLAKE.DATA_SHARING_USAGE.MARKETPLACE_PAID_USAGE_DAILY
+-- WHERE charge_type='MONETIZABLE_BILLING_EVENTS'
+limit 10
+;
+
+
+

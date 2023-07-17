@@ -10,7 +10,7 @@ version:
 artifacts:
   readme: README.md
   setup_script: setup_script.sql
-  default_streamlit: CUSTOMER_DATA.STREAMLIT
+  default_streamlit: SHARED_DATA.STREAMLIT
   extension_code: true
 
 configuration:
@@ -32,22 +32,22 @@ privileges:
         description: "Share Object Access - Will Query Snowflake WH for Usage Views"
 
 references:
-  - enrichment_table:
-      label: "Enrichment Table"
-      description: "Requesting Select, Insert & Update access to a local Table"
-      privileges:
-        - SELECT
-        - INSERT
-        - UPDATE
-      object_type: Table
-      multi_valued: false
-      register_callback: CORE.REGISTER_CB
-
   - data_view:
       label: "View Access"
       description: "Requesting access to read from a table in your account"
       privileges:
         - SELECT
       object_type: View
+      multi_valued: false
+      register_callback: CORE.REGISTER_CB
+
+  - holdings_table:
+      label: "Holdings Table"
+      description: "Requesting Select rights on your holdings data"
+      privileges:
+        - SELECT
+        # - INSERT
+        # - UPDATE
+      object_type: Table
       multi_valued: false
       register_callback: CORE.REGISTER_CB
