@@ -69,7 +69,7 @@ DROP APPLICATION native_app_sec_application;
 CREATE APPLICATION native_app_sec_application
   FROM APPLICATION PACKAGE native_app_sec_package
   USING VERSION V1
-  PATCH 88;
+  PATCH 90;
 
 //SHOW SCHEMAS IN APP
 show schemas in database native_app_sec_application;
@@ -171,29 +171,9 @@ SELECT * FROM reference('holdings_table');
 CALL NATIVE_APP_SEC_APPLICATION.CORE.CREATE_OBJECTS();
 
 
-select *
-from NATIVE_APP_SEC_APPLICATION.CUSTOMER_DATA.CURRENT_VALUE
-;
 
 
-
-
-
-
-
-
-
-
-
-
-SELECT listing_global_name,
-   listing_display_name,
-   charge_type,
-   charge
-FROM SNOWFLAKE.DATA_SHARING_USAGE.MARKETPLACE_PAID_USAGE_DAILY
--- WHERE charge_type='MONETIZABLE_BILLING_EVENTS'
-limit 10
-;
-
+---------------------------------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------------------------------
 
 
