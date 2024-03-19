@@ -43,10 +43,10 @@ references:
 
   - holdings_table:
       label: "Holdings Table"
-      description: "Requesting Select rights on your holdings data"
+      description: "Requesting Select & Insert rights on your holdings data table"
       privileges:
         - SELECT
-        # - INSERT
+        - INSERT
         # - UPDATE
       object_type: Table
       multi_valued: false
